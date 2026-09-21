@@ -2000,7 +2000,7 @@ END:
 }
 #endif /* MY_DEF_HERE */
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SATA_ASM116X_CONTROL
 #define SYNO_ASM116X_LED_UNIT_REG    0x1D20
 #define SYNO_ASM116X_GPIO_MODE_REG   0x1D6E
 #define SYNO_ASM116X_GPIO_CTL_REG    0x1D6A
@@ -2133,7 +2133,7 @@ static void syno_asmedia_116x_disk_led_gpio_init(struct ata_host *host, unsigned
 END:
 	return;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_SATA_ASM116X_CONTROL */
 
 static u32 syno_asmedia_116x_fw_version_get(struct pci_dev *pdev, unsigned int devfn, unsigned int reg_addr)
 {
@@ -2190,10 +2190,8 @@ void syno_asmedia_116x_init(struct ata_host *host)
 
 	syno_asmedia_116x_fw_version_show(host);
 
-#ifdef MY_DEF_HERE
 	// Initialize GPIO Mode for led control
 	syno_asmedia_116x_disk_led_gpio_init(host, host->n_ports);
-#endif /* MY_DEF_HERE */
 
 #ifdef MY_DEF_HERE
 	if (syno_is_hw_version(HW_RS2421p) || syno_is_hw_version(HW_RS2421rpp)) {
@@ -3437,6 +3435,13 @@ END:
 extern void syno_pci_eunit_unique_fill(struct ata_port *ap);
 #endif /* MY_DEF_HERE */
 #ifdef CONFIG_SYNO_SATA_ASM116X_CONTROL
+/* Task#171 对齐 arc：ahci.o 不注入 MY_DEF_HERE（scsi_host_template 与 sd.o 布局一致，
+ * 消除 disk_power_loss 偏移错位崩溃）。eunit 函数（CONTROL=y 时编译）所需声明在
+ * synolib.h 内被 MY_DEF_HERE 门控，这里显式给出；定义位于 lib/synolib/
+ * syno_pcie_switch_i2c.c（syno_pci_dev_to_eunit_node）与 syno_pciepath_dts_pattern.c
+ * （syno_compare_dts_eunit_pciepath），该两文件仍注入 MY_DEF_HERE，链接可解析。 */
+extern struct device_node *syno_pci_dev_to_eunit_node(struct pci_dev *pdev, char *eunit_name);
+extern int syno_compare_dts_eunit_pciepath(struct pci_dev *pdev, const struct device_node *pAhciNode);
 static bool syno_asmedia_116x_eunit_init_and_signal_adjust_by_dts(struct ata_host *host)
 {
 	bool blRet = false;
