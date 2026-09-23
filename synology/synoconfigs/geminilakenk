@@ -2162,7 +2162,7 @@ CONFIG_VLAN_8021Q=m
 # CONFIG_DECNET is not set
 CONFIG_LLC=m
 # CONFIG_LLC2 is not set
-# CONFIG_ATALK is not set
+CONFIG_ATALK=m
 # CONFIG_X25 is not set
 # CONFIG_LAPB is not set
 # CONFIG_PHONET is not set
