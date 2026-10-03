@@ -79,10 +79,10 @@ extern int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(int index);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 #endif /* MY_ABC_HERE */
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern int syno_acm_get_usb_port(const char **usb_path, int eunit_slot);
 extern struct syno_control_operations *syno_control_operation_get(const int slot_type, const int slot_index);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 #ifdef MY_ABC_HERE
 #include <linux/random.h>
@@ -100,9 +100,9 @@ extern int giSynoSpinupGroupDelay;
 static int gCurrentSpinupGroupNum = 0;
 static int giNeedWakeAll = 0;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static int syno_ata_eunit_disk_delay_check(const struct ata_device *dev, const int spinup);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 #endif /* MY_ABC_HERE */
 
 #ifdef MY_ABC_HERE
@@ -379,13 +379,13 @@ int iIsSynoPmCtlSupport(const struct ata_port *ap)
 #endif /* MY_ABC_HERE */
 #ifdef MY_ABC_HERE
 	if (ap->nr_pmp_links && syno_is_synology_pm(ap)) {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		// do not control usb acm power while restarting
 		// power control may not be available immediately after system restart
 		if (IS_SYNOLOGY_USB_ACM_EUNIT(ap->PMSynoUnique) && SYSTEM_RESTART == system_state) {
 			goto END;
 		}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 		ret = 1;
 		goto END;
 	}
@@ -1534,14 +1534,14 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 	int index = 0;
 	int NumOfPMPorts = 0;
 	char szPciePath[SYNO_DTS_PROPERTY_CONTENT_LENGTH] = {'\0'};
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	const char *usb_path = NULL;
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	if (ap->nr_pmp_links &&
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		0 > syno_acm_get_usb_port(&usb_path, syno_external_libata_index_get(ap)) &&
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 		(syno_is_synology_pm(ap) ||
 		syno_pm_with_synology_magic(ap))) {
 		char szTmp[BDEVNAME_SIZE];
@@ -4435,9 +4435,9 @@ static void ata_scsi_qc_complete(struct ata_queued_cmd *qc)
 			giNeedWakeAll = 0;
 		}
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		syno_ata_eunit_disk_delay_check(qc->dev, SPINDOWN);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 	}
 #endif /* MY_ABC_HERE */
 
@@ -4630,14 +4630,14 @@ static int SynoIssueWakeUpCmd(struct ata_device *dev, struct scsi_cmnd *cmd)
 		goto ISSUE_CMD;
 	}
 #endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (ap->nr_pmp_links) {
 		if (0 < giSynoSpinupGroupDebug) {
 			ata_link_info(dev->link, "Spining up\n");
 		}
 		goto ISSUE_CMD;
 	}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 	/* issue read and update gulLastWake */
 	spin_lock(&SYNOLastWakeLock);
 	gulLastWake = jiffies;
@@ -4659,9 +4659,9 @@ static int SynoIssueWakeUpCmd(struct ata_device *dev, struct scsi_cmnd *cmd)
 	}
 	spin_unlock(&SYNOLastWakeLock);
 	DBGMESG("port %d update gulLastWake %lu and issue read\n", ap->print_id, gulLastWake);
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 ISSUE_CMD:
-#endif /* MY_ABC_HERE || MY_ABC_HERE */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 	dev->ulLastCmd = jiffies;
 	ata_qc_issue(qc);
 
@@ -4677,9 +4677,9 @@ ERR_MEM:
 		}
 	} else {
 #endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	syno_ata_eunit_disk_delay_check(qc->dev, SPINDOWN);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 #ifdef MY_ABC_HERE
 	}
 #endif /* MY_ABC_HERE */
@@ -4695,9 +4695,9 @@ DEFER:
 		}
 	} else {
 #endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	syno_ata_eunit_disk_delay_check(qc->dev, SPINDOWN);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 #ifdef MY_ABC_HERE
 	}
 #endif /* MY_ABC_HERE */
@@ -4708,7 +4708,7 @@ DEFER:
 		return SCSI_MLQUEUE_HOST_BUSY;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static int syno_ata_eunit_disk_delay_check(const struct ata_device *dev, const int spinup)
 {
 	int eunit_index = 0;
@@ -4811,7 +4811,7 @@ ISSUE_READ:
 WAIT:
 	return SCSI_MLQUEUE_HOST_BUSY;
 }
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 static int syno_ata_disk_delay_check(struct ata_port *ap)
 {
@@ -4865,11 +4865,11 @@ static int syno_ata_scsi_translate(struct ata_device *dev, struct scsi_cmnd *cmd
 
 	/* no insert comamnd while the device is derived from PM */
 	if (ap->nr_pmp_links) {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (IS_SYNOLOGY_USB_ACM_EUNIT(ap->PMSynoUnique)){
 			return syno_eunit_ata_scsi_translate(dev, cmd, xlat_func);
 		}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 		goto PASS;
 	}
 
@@ -7313,9 +7313,9 @@ typedef enum _tag_ATACMD_HOOK_ACTION {
 static ATACMD_HOOK_ACTION syno_ata_scsi_xlat_prehook(struct ata_device *dev, struct scsi_cmnd *scmd)
 {
 	ATACMD_HOOK_ACTION ret = ACT_BYPASS;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct Scsi_Host *scsi_host = dev->link->ap->scsi_host;
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 
 #ifdef MY_ABC_HERE
@@ -7340,14 +7340,14 @@ static ATACMD_HOOK_ACTION syno_ata_scsi_xlat_prehook(struct ata_device *dev, str
 		}
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if(IS_SYNOLOGY_USB_ACM_EUNIT(dev->link->ap->PMSynoUnique)) {
 		if (scsi_host && scsi_host->is_eunit_deepsleep) {
 			ata_port_schedule_eh(dev->link->ap);
 			return ACT_REISSUE;
 		}
 	}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	if(IS_SYNOLOGY_RX1223RP(dev->link->ap->PMSynoUnique)) {
 		if ((dev->link->ap->pflags & ATA_PFLAG_SYNO_DS_WAKING)) {
@@ -8279,9 +8279,9 @@ static void syno_ata_info_enum(struct ata_port *ap, struct scsi_device *sdev) {
 #ifdef MY_ABC_HERE
 	struct ata_device *dev = NULL;
 #endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct syno_control_operations *ctrl_op = NULL;
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	if (NULL == ap || NULL == sdev || NULL == ap->host) {
 		return;
@@ -8310,10 +8310,10 @@ static void syno_ata_info_enum(struct ata_port *ap, struct scsi_device *sdev) {
 			snprintf(sdev->syno_block_info, BLOCK_INFO_SIZE, "%sunique=%s\n", sdev->syno_block_info, EBOX_INFO_UNIQUE_DX1215II);
 		} else if (IS_SYNOLOGY_RX1223RP(ap->PMSynoUnique)) {
 			snprintf(sdev->syno_block_info, BLOCK_INFO_SIZE, "%sunique=%s\n", sdev->syno_block_info, EBOX_INFO_UNIQUE_RX1223RP);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		} else if (NULL != (ctrl_op = syno_control_operation_get(EUNIT_DEVICE, syno_external_libata_index_get(ata_shost_to_port(sdev->host))))) {
 			snprintf(sdev->syno_block_info, BLOCK_INFO_SIZE, "%sunique=%s\n", sdev->syno_block_info, ctrl_op->control_method);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 		}
 #ifdef MY_DEF_HERE
 	} else if (syno_is_ap_rx1224rp(ap)) {
@@ -8327,11 +8327,11 @@ static void syno_ata_info_enum(struct ata_port *ap, struct scsi_device *sdev) {
 extern void syno_pci_dev_device_list_set(struct pci_dev *pdev, int add, const char *disk_name);
 #endif /* MY_DEF_HERE */
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern void syno_acm_device_list_set(struct scsi_device *sdev, int add, const char* device_name);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 void syno_libata_device_list_set(struct scsi_device *sdev, int add, const char *disk_name)
 {
 	struct ata_port *ap = NULL;
@@ -8357,13 +8357,13 @@ void syno_libata_device_list_set(struct scsi_device *sdev, int add, const char *
 	}
 #endif /* MY_DEF_HERE */
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (IS_SYNOLOGY_USB_ACM_EUNIT(ap->PMSynoUnique) || 0 < syno_external_libata_index_get(ap)) {
 		syno_acm_device_list_set(sdev, add, disk_name);
 	}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 }
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
 
 void syno_libata_info_enum(struct scsi_device *sdev) {
 	struct ata_port *ap = NULL;
@@ -8524,7 +8524,7 @@ int syno_libata_disk_power_loss_when_reboot(struct scsi_device *sdev)
 	} else if (syno_is_synology_pm(ap)) {
 		if (IS_SYNOLOGY_RX1223RP(ap->PMSynoUnique)) {
 			snprintf(unique, sizeof(unique), "%s", EBOX_INFO_UNIQUE_RX1223RP);
-	#ifdef MY_ABC_HERE
+	#ifdef MY_DEF_HERE
 		} else if (IS_SYNOLOGY_USB_ACM_EUNIT(ap->PMSynoUnique)) {
 			int eunit_index = 0;
 			struct syno_control_operations *ctrl_op = NULL;
@@ -8540,7 +8540,7 @@ int syno_libata_disk_power_loss_when_reboot(struct scsi_device *sdev)
 				printk(KERN_ERR "failed to unique on eunit %d\n", eunit_index);
 				return -1;
 			}
-	#endif /* MY_ABC_HERE */
+	#endif /* MY_DEF_HERE */
 		} else {
 			return -1;
 		}
