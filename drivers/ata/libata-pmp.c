@@ -15,10 +15,10 @@
 #include <linux/slab.h>
 #include "libata.h"
 #include "libata-transport.h"
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern int syno_usb_eunit_deep_sleep_indicator(const char *usb_port, const int control);
 extern struct syno_control_operations * syno_control_operation_get(const int slot_type, const int slot_index);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 #ifdef MY_ABC_HERE
 extern bool g_support_syno_dpm;
@@ -915,12 +915,12 @@ static int syno_sata_jmb575_pwrbtn(struct ata_port *ap, u8 blDisable)
 		goto END;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (IS_SYNOLOGY_USB_ACM_EUNIT(ap->PMSynoUnique)) {
 		iRet = 0;
 		goto END;
 	}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	if (syno_pmp_get_ebox_node_by_unique_id(ap->PMSynoUnique, ap->PMSynoIsRP, &pEBoxNode)) {
 		printk("Get EBox node fail");
@@ -1434,7 +1434,7 @@ syno_sata_pmp_read_emid(struct ata_port *ap)
 							GPI_9705_EMID_BIT2(pm_pkg.var)|
 							GPI_9705_EMID_BIT3(pm_pkg.var);
 	} else if (syno_pm_is_synology_jmb575(ap)) {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (IS_SYNOLOGY_USB_ACM_EUNIT(ap->PMSynoUnique)) {
 			if(0 <= (emid = syno_pmp_get_emid(ap))) {
 				ap->PMSynoEMID = emid;
@@ -1442,7 +1442,7 @@ syno_sata_pmp_read_emid(struct ata_port *ap)
 			}
 			goto END;
 		}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 		if(syno_sata_jmb575_custom_cmd(ap, SYNO_JMB575_GET_EMID, &emid)) {
 			ata_dev_printk(ap->link.device, KERN_WARNING, "JMB575: Get EMID faild\n");
 			goto END;
@@ -1550,12 +1550,12 @@ syno_sata_pmp_check_powerbtn(struct ata_port *ap)
 	vendor = sata_pmp_gscr_vendor(ap->link.device->gscr);
 	devid = sata_pmp_gscr_devid(ap->link.device->gscr);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (IS_SYNOLOGY_USB_ACM_EUNIT(ap->PMSynoUnique)) {
 		iRes = 0;
 		goto END;
 	}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	if (syno_pm_is_9705(vendor, devid)) {
 		syno_pm_raidledstate_pkg_init(sata_pmp_gscr_vendor(ap->link.device->gscr),
@@ -1686,12 +1686,12 @@ syno_pm_is_poweron(struct ata_port *ap)
 			goto END;
 		}
 	}else if (syno_pm_is_jmb575(vendor, devid)) {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (IS_SYNOLOGY_USB_ACM_EUNIT(ap->PMSynoUnique)) {
 			iRes = 1;
 			goto END;
 		}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 		if (syno_pmp_get_ebox_node_by_unique_id(ap->PMSynoUnique, ap->PMSynoIsRP, &pEBoxNode)) {
 			printk("Get EBox node fail");
 			goto END;
@@ -1820,10 +1820,10 @@ int syno_libata_pmp_deepsleep_indicator_set(struct ata_port *ap, const int blCLR
 	struct device_node *pPwrNode;
 	SYNO_JMB575_I2C_DEV_INFO i2cInfo;
 	SYNO_PM_I2C_PKG i2cPkg;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	int eunit_index = 0;
 	struct syno_control_operations *ctrl_op = NULL;
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	if (!ap) {
 		goto END;
@@ -1852,14 +1852,14 @@ int syno_libata_pmp_deepsleep_indicator_set(struct ata_port *ap, const int blCLR
 			}
 		}
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	} else if (0 < (eunit_index = syno_external_libata_index_get(ap)) &&
 			   NULL != (ctrl_op = syno_control_operation_get(EUNIT_DEVICE, eunit_index))) {
 		if (0 > ctrl_op->deep_sleep_indicator_ctrl(EUNIT_DEVICE, eunit_index, blCLR)) {
 			printk(KERN_DEBUG "Failed to control deep sleep indicator\n");
 			goto END;
 		}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 	} else if (syno_pm_is_jmb575(vendor, devid)) {
 
 		if (syno_pmp_get_ebox_node_by_unique_id(ap->PMSynoUnique, ap->PMSynoIsRP, &pEBoxNode)) {
@@ -1911,10 +1911,10 @@ static int syno_sata_pmp_read_unique(struct ata_port *ap)
 	unsigned short devid = 0;
 	SYNO_PM_PKG pm_pkg;
 	unsigned int var = 0;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	int eunit_index = 0;
 	struct syno_control_operations *ctrl_op = NULL;
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	if (!ap) {
 		goto END;
@@ -1929,14 +1929,14 @@ static int syno_sata_pmp_read_unique(struct ata_port *ap)
 		goto END;
 	}
 #endif /* MY_DEF_HERE */
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (0 < (eunit_index = syno_external_libata_index_get(ap)) &&
 		NULL != (ctrl_op = syno_control_operation_get(EUNIT_DEVICE, eunit_index))) {
 		if (0 == strcmp(DT_USB_TO_TTY, ctrl_op->control_method)) {
 			ap->PMSynoUnique = SYNOLOGY_USB_ACM_EUNIT_PM_ID;
 		}
 	} else
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 	if (syno_pm_is_9705(vendor, devid)) {
 		syno_pm_unique_pkg_init(vendor,	devid, &pm_pkg);
 
@@ -1980,10 +1980,10 @@ static int syno_libata_pm_power_ctl_core(struct ata_port *ap, u8 pwrOp)
 	u8 blPowerOn = (pwrOp & (SYNO_PWR_OP_POWER_ON | SYNO_PWR_OP_WAKE))? 1 : 0;
 	int i = 0;
 	int regManual = 0;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	int eunit_index = 0;
 	struct syno_control_operations *ctrl_op = NULL;
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	if (NULL == ap) {
 		goto END;
@@ -1992,11 +1992,11 @@ static int syno_libata_pm_power_ctl_core(struct ata_port *ap, u8 pwrOp)
 	vendor = sata_pmp_gscr_vendor(ap->link.device->gscr);
 	devid = sata_pmp_gscr_devid(ap->link.device->gscr);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (0 < (eunit_index = syno_external_libata_index_get(ap))) {
 		ctrl_op = syno_control_operation_get(EUNIT_DEVICE, eunit_index);
 	}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	for (iRetry = 0; blPowerOn ^ syno_pm_is_poweron(ap)
 					 && iRetry < SYNO_PMP_PWR_TRIES; ++iRetry) {
@@ -2066,13 +2066,13 @@ static int syno_libata_pm_power_ctl_core(struct ata_port *ap, u8 pwrOp)
 				printk("ata%d re-check pm unique read fail\n", ap->print_id);
 				goto END;
 			}
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		} else if (ctrl_op) {
 			if (ctrl_op->power_control) {
 				ctrl_op->power_control(EUNIT_DEVICE, eunit_index);
 			}
 			break;
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 #ifdef MY_DEF_HERE
 		} else if (syno_is_synology_pci_eunit(ap)) {
 			break;
