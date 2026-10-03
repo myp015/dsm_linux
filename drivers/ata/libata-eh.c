@@ -39,9 +39,9 @@
 #include <linux/synobios.h>
 #endif /* MY_ABC_HERE */
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 extern struct syno_control_operations *syno_control_operation_get(const int slot_type, const int slot_index);
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 #ifdef MY_ABC_HERE
 extern struct list_head gSynoBiosEventHead;
@@ -974,11 +974,11 @@ static int schedule_eunit_eh(struct ata_port *pAp_target)
 		goto END;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (!IS_SYNOLOGY_RX1223RP(pAp_target->PMSynoUnique) && !IS_SYNOLOGY_USB_ACM_EUNIT(pAp_target->PMSynoUnique)) {
-#else /* MY_ABC_HERE */
+#else /* MY_DEF_HERE */
 	if (!IS_SYNOLOGY_RX1223RP(pAp_target->PMSynoUnique)) {
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 		iRet = 0;
 		goto END;
 	}
@@ -5099,7 +5099,7 @@ static int ata_eh_handle_dev_fail(struct ata_device *dev, int err)
 	}
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static 
 int syno_get_disk_slot_from_pmp_link(const char *eunit_unique, const int pmp_emid, const int pmp_link)
 {
@@ -5195,7 +5195,7 @@ static int syno_ata_eunit_disk_wait_power_on(const struct ata_link *link)
 END:
 	return ret;
 }
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 /**
  *	ata_eh_recover - recover host port after error
@@ -5306,12 +5306,12 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 	ata_for_each_link(link, ap, EDGE) {
 		struct ata_eh_context *ehc = &link->eh_context;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		/* if eunit is wakeup from deepsleep, wait until the slot power is on before reset */
 		if (ap->pflags & ATA_PFLAG_SYNO_DS_WAKING) {
 			syno_ata_eunit_disk_wait_power_on(link);
 		}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 		if (!(ehc->i.action & ATA_EH_RESET))
 			continue;

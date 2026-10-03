@@ -29,12 +29,12 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #include "sd.h"
 #include <linux/synolib.h>
 #include <linux/synobios.h>
 extern struct syno_control_operations syno_control_operations_lists[];
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 #ifdef MY_ABC_HERE
 #ifdef KERN_INFO
@@ -715,20 +715,20 @@ syno_block_info_show(struct device *device, struct device_attribute *attr, char 
 {
 	struct scsi_device *sdev = NULL;
 	ssize_t len = -EFAULT;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	char *control_method = NULL;
 	struct syno_control_operations *ctrl_op = NULL;
 	char unique[SYNO_EBOX_UNIQUE_MAX_LEN] = {0};
 	char syno_block_info_tmp[BLOCK_INFO_SIZE] = {0};
 	struct scsi_disk *sdkp = NULL;
 	int container_index = 0;
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	if (NULL == (sdev = to_scsi_device(device))) {
 		goto END;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	for (ctrl_op = syno_control_operations_lists; ctrl_op && strlen(ctrl_op->control_method); ctrl_op++) {
 		read_lock(&(sdev->syno_block_info_rwlock));
 		control_method = strstr(sdev->syno_block_info, ctrl_op->control_method);
@@ -757,7 +757,7 @@ syno_block_info_show(struct device *device, struct device_attribute *attr, char 
 		}
 		
 	}
-#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 
 	read_lock(&(sdev->syno_block_info_rwlock));
 	len = snprintf(buf, BLOCK_INFO_SIZE , "%s", sdev->syno_block_info);

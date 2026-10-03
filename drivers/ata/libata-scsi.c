@@ -8331,7 +8331,7 @@ extern void syno_pci_dev_device_list_set(struct pci_dev *pdev, int add, const ch
 extern void syno_acm_device_list_set(struct scsi_device *sdev, int add, const char* device_name);
 #endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 void syno_libata_device_list_set(struct scsi_device *sdev, int add, const char *disk_name)
 {
 	struct ata_port *ap = NULL;
@@ -8363,7 +8363,7 @@ void syno_libata_device_list_set(struct scsi_device *sdev, int add, const char *
 	}
 #endif /* MY_DEF_HERE */
 }
-#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 
 void syno_libata_info_enum(struct scsi_device *sdev) {
 	struct ata_port *ap = NULL;
