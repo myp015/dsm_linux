@@ -38,14 +38,14 @@
 #include <linux/synolib.h>
 #endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
 
-#if defined(MY_ABC_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C)
+#if defined(MY_DEF_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C)
 #include <linux/of.h>
 #include <linux/synolib.h>
 extern int syno_pciepath_dts_pattern_get(struct pci_dev *pdev, char *szPciePath, const int size);
 extern void syno_acm_device_list_add(int slot_index, const char* device_name);
 extern void syno_acm_device_list_delete(const char* device_name);
 extern struct device_node *syno_pcie_path_to_eunit_root_port(const char *pciepath, bool exactly);
-#endif /* defined(MY_ABC_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C) */
+#endif /* defined(MY_DEF_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C) */
 
 #define NVME_MINORS		(1U << MINORBITS)
 
@@ -4887,12 +4887,12 @@ static void nvme_free_ctrl(struct device *dev)
 	struct nvme_ctrl *ctrl =
 		container_of(dev, struct nvme_ctrl, ctrl_device);
 	struct nvme_subsystem *subsys = ctrl->subsys;
-#if defined(MY_ABC_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C)
+#if defined(MY_DEF_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C)
 	char disk_name[DISK_NAME_LEN] = {0};
 
 	sprintf(disk_name, "nvme%d", ctrl->instance);
 	syno_acm_device_list_delete(disk_name);
-#endif /* defined(MY_ABC_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C) */
+#endif /* defined(MY_DEF_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C) */
 
 
 	if (!subsys || ctrl->instance != subsys->instance)
@@ -4925,12 +4925,12 @@ int nvme_init_ctrl(struct nvme_ctrl *ctrl, struct device *dev,
 {
 	int ret;
 
-#if defined(MY_ABC_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C)
+#if defined(MY_DEF_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C)
 	char sztemp[SYNO_DTS_PROPERTY_CONTENT_LENGTH] = {'\0'};
 	struct device_node *eunit_node = NULL;
 	int index = -1;
 	char disk_name[DISK_NAME_LEN] = {0};
-#endif /* defined(MY_ABC_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C) */
+#endif /* defined(MY_DEF_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C) */
 
 	ctrl->state = NVME_CTRL_NEW;
 	spin_lock_init(&ctrl->lock);
@@ -5009,7 +5009,7 @@ int nvme_init_ctrl(struct nvme_ctrl *ctrl, struct device *dev,
 	nvme_fault_inject_init(&ctrl->fault_inject, dev_name(ctrl->device));
 	nvme_mpath_init_ctrl(ctrl);
 
-#if defined(MY_ABC_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C)
+#if defined(MY_DEF_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C)
 	syno_pciepath_dts_pattern_get(to_pci_dev(ctrl->dev), sztemp, SYNO_DTS_PROPERTY_CONTENT_LENGTH);
 	eunit_node = syno_pcie_path_to_eunit_root_port(sztemp, false);
 
@@ -5021,7 +5021,7 @@ int nvme_init_ctrl(struct nvme_ctrl *ctrl, struct device *dev,
 			syno_acm_device_list_add(index, disk_name);
 		}
 	}	
-#endif /* defined(MY_ABC_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C) */
+#endif /* defined(MY_DEF_HERE) && defined(CONFIG_SYNO_PCI_EUNIT_I2C) */
 
 	return 0;
 out_free_name:
