@@ -1413,6 +1413,20 @@ static void __queue_work(int cpu, struct workqueue_struct *wq,
 	unsigned int req_cpu = cpu;
 
 	/*
+	 * Task#217：按更小 NR_CPUS 编译的外部模块（群晖官方/私有模块）会把
+	 * 它编译时的 WORK_CPU_UNBOUND（= 其 NR_CPUS，如 8/16/24）直接传给
+	 * queue_work_on()/schedule_work()。本内核 NR_CPUS 更大时该值
+	 * >= nr_cpu_ids 却不等于 WORK_CPU_UNBOUND，会被当成真实 CPU 编号去
+	 * 索引 per_cpu_ptr()/cpu_to_node()，落到从未初始化的 __per_cpu_offset[]
+	 * 项上（DS425+ 加载 iSCSI LUN 时 __queue_work+0x161 即因此 Oops）。
+	 * 越界编号一律还原为 UNBOUND —— 调用者本意就是"任意 CPU"。
+	 */
+	if ((unsigned int)req_cpu >= nr_cpu_ids) {
+		req_cpu = WORK_CPU_UNBOUND;
+		cpu = WORK_CPU_UNBOUND;
+	}
+
+	/*
 	 * While a work item is PENDING && off queue, a task trying to
 	 * steal the PENDING will busy-loop waiting for it to either get
 	 * queued or lose PENDING.  Grabbing PENDING and queueing should
@@ -1641,6 +1655,10 @@ static void __queue_delayed_work(int cpu, struct workqueue_struct *wq,
 	WARN_ON_ONCE(timer->function != delayed_work_timer_fn);
 	WARN_ON_ONCE(timer_pending(timer));
 	WARN_ON_ONCE(!list_empty(&work->entry));
+
+	/* Task#217：同上，避免 add_timer_on()/dwork->cpu 使用越界编号。 */
+	if ((unsigned int)cpu >= nr_cpu_ids)
+		cpu = WORK_CPU_UNBOUND;
 
 	/*
 	 * If @delay is 0, queue @dwork->work immediately.  This is for
