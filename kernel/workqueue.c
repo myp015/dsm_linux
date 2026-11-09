@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * kernel/workqueue.c - generic async execution with shared worker pool
@@ -109,10 +106,10 @@ enum {
 	RESCUER_NICE_LEVEL	= MIN_NICE,
 	HIGHPRI_NICE_LEVEL	= MIN_NICE,
 
-#ifdef MY_ABC_HERE
-#else /* MY_ABC_HERE */
+#ifdef CONFIG_SYNO_KWORK_STAT
+#else /* CONFIG_SYNO_KWORK_STAT */
 	WQ_NAME_LEN		= 24,
-#endif /* MY_ABC_HERE */
+#endif /* CONFIG_SYNO_KWORK_STAT */
 };
 
 /*
@@ -273,9 +270,9 @@ struct workqueue_struct {
 #endif
 	char			name[WQ_NAME_LEN]; /* I: workqueue name */
 
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_KWORK_STAT
 	atomic64_t 		timer_sampled_us; /* Sample count by timer interrput */
-#endif /* MY_ABC_HERE */
+#endif /* CONFIG_SYNO_KWORK_STAT */
 
 	/*
 	 * Destruction of workqueue_struct is RCU protected to allow walking
@@ -1413,20 +1410,6 @@ static void __queue_work(int cpu, struct workqueue_struct *wq,
 	unsigned int req_cpu = cpu;
 
 	/*
-	 * Task#217：按更小 NR_CPUS 编译的外部模块（群晖官方/私有模块）会把
-	 * 它编译时的 WORK_CPU_UNBOUND（= 其 NR_CPUS，如 8/16/24）直接传给
-	 * queue_work_on()/schedule_work()。本内核 NR_CPUS 更大时该值
-	 * >= nr_cpu_ids 却不等于 WORK_CPU_UNBOUND，会被当成真实 CPU 编号去
-	 * 索引 per_cpu_ptr()/cpu_to_node()，落到从未初始化的 __per_cpu_offset[]
-	 * 项上（DS425+ 加载 iSCSI LUN 时 __queue_work+0x161 即因此 Oops）。
-	 * 越界编号一律还原为 UNBOUND —— 调用者本意就是"任意 CPU"。
-	 */
-	if ((unsigned int)req_cpu >= nr_cpu_ids) {
-		req_cpu = WORK_CPU_UNBOUND;
-		cpu = WORK_CPU_UNBOUND;
-	}
-
-	/*
 	 * While a work item is PENDING && off queue, a task trying to
 	 * steal the PENDING will busy-loop waiting for it to either get
 	 * queued or lose PENDING.  Grabbing PENDING and queueing should
@@ -1655,10 +1638,6 @@ static void __queue_delayed_work(int cpu, struct workqueue_struct *wq,
 	WARN_ON_ONCE(timer->function != delayed_work_timer_fn);
 	WARN_ON_ONCE(timer_pending(timer));
 	WARN_ON_ONCE(!list_empty(&work->entry));
-
-	/* Task#217：同上，避免 add_timer_on()/dwork->cpu 使用越界编号。 */
-	if ((unsigned int)cpu >= nr_cpu_ids)
-		cpu = WORK_CPU_UNBOUND;
 
 	/*
 	 * If @delay is 0, queue @dwork->work immediately.  This is for
@@ -2295,11 +2274,11 @@ __acquires(&pool->lock)
 	 */
 	lockdep_invariant_state(true);
 	trace_workqueue_execute_start(work);
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_KWORK_STAT
 	worker_run_work(worker, work);
 #else
 	worker->current_func(work);
-#endif /* MY_ABC_HERE */
+#endif /* CONFIG_SYNO_KWORK_STAT */
 
 	/*
 	 * While we must be careful to not use "work" after this, the trace
@@ -3376,6 +3355,9 @@ void free_workqueue_attrs(struct workqueue_attrs *attrs)
 		kfree(attrs);
 	}
 }
+#ifdef CONFIG_SYNO_MD_NUMA_SETTING_ENHANCE
+EXPORT_SYMBOL(free_workqueue_attrs);
+#endif /* CONFIG_SYNO_MD_NUMA_SETTING_ENHANCE */
 
 /**
  * alloc_workqueue_attrs - allocate a workqueue_attrs
@@ -3401,6 +3383,9 @@ fail:
 	free_workqueue_attrs(attrs);
 	return NULL;
 }
+#ifdef CONFIG_SYNO_MD_NUMA_SETTING_ENHANCE
+EXPORT_SYMBOL(alloc_workqueue_attrs);
+#endif /* CONFIG_SYNO_MD_NUMA_SETTING_ENHANCE */
 
 static void copy_workqueue_attrs(struct workqueue_attrs *to,
 				 const struct workqueue_attrs *from)
@@ -4112,6 +4097,9 @@ int apply_workqueue_attrs(struct workqueue_struct *wq,
 
 	return ret;
 }
+#ifdef CONFIG_SYNO_MD_NUMA_SETTING_ENHANCE
+EXPORT_SYMBOL(apply_workqueue_attrs);
+#endif /* CONFIG_SYNO_MD_NUMA_SETTING_ENHANCE */
 
 /**
  * wq_update_unbound_numa - update NUMA affinity of a wq for CPU hot[un]plug
@@ -5448,7 +5436,7 @@ static ssize_t max_active_store(struct device *dev,
 }
 static DEVICE_ATTR_RW(max_active);
 
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_KWORK_STAT
 static ssize_t timer_sampled_us_show(struct device *dev, struct device_attribute *attr,
 			    char *buf)
 {
@@ -5457,14 +5445,14 @@ static ssize_t timer_sampled_us_show(struct device *dev, struct device_attribute
 	return scnprintf(buf, PAGE_SIZE, "%llu\n", (u64)atomic64_read(&wq->timer_sampled_us));
 }
 static DEVICE_ATTR_RO(timer_sampled_us);
-#endif /* MY_ABC_HERE */
+#endif /* CONFIG_SYNO_KWORK_STAT */
 
 static struct attribute *wq_sysfs_attrs[] = {
 	&dev_attr_per_cpu.attr,
 	&dev_attr_max_active.attr,
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_KWORK_STAT
 	&dev_attr_timer_sampled_us.attr,
-#endif /* MY_ABC_HERE */
+#endif /* CONFIG_SYNO_KWORK_STAT */
 	NULL,
 };
 ATTRIBUTE_GROUPS(wq_sysfs);
@@ -5926,7 +5914,7 @@ static void wq_watchdog_init(void)
 static inline void wq_watchdog_init(void) { }
 
 #endif	/* CONFIG_WQ_WATCHDOG */
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_KWORK_STAT
 struct workqueue_struct* get_pwq_wq(struct pool_workqueue *pwq)
 {
 	if (pwq)
@@ -5950,7 +5938,7 @@ void account_workqueue_time(struct task_struct *p, u64 us, gfp_t gfp)
 	account_work_time(acct, us, gfp);
 }
 EXPORT_SYMBOL(account_workqueue_time);
-#endif /* MY_ABC_HERE */
+#endif /* CONFIG_SYNO_KWORK_STAT */
 
 static void __init wq_numa_init(void)
 {
